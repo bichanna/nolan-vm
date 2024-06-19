@@ -13,7 +13,11 @@ add_project_arguments('-Wno-c++11-extensions', language: 'cpp')
 include=include_directories('include')
 
 src=[
-  'src/main.cpp'
+  'src/main.cpp',
+  'src/gc.cpp',
+  'src/util.cpp',
+  'src/value.cpp',
+  'src/vm.cpp'
 ]
 
 executable('nolanvm',
