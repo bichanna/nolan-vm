@@ -66,16 +66,16 @@ namespace vm {
     vector<uint8_t>* instructions;
     vector<string*> errors;
 
-    bool next_ip();
+    bool nextIp();
 
-    uint8_t read_byte();
-    uint16_t read_two_bytes();
+    uint8_t readByte();
+    uint16_t readTwoBytes();
     void push(gc::Val val);
     gc::Val pop();
     void pop(int num);
     gc::Val peek(uint8_t peek);
     void jump(uint16_t jump);
-    gc::Val read_const();
+    gc::Val readConst();
   };
 }
 

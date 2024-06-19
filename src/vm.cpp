@@ -20,23 +20,23 @@ std::vector<string*> VM::run() {
 
   do {
     switch (static_cast<OpCode>(*(this->ip))) {}
-  } while (this->next_ip());
+  } while (this->nextIp());
 
   return this->errors;
 }
 
-bool VM::next_ip() {
+bool VM::nextIp() {
   this->ip = this->ip + 1;
   return this->ip != this->instructions->end();
 }
 
-std::uint8_t VM::read_byte() {
-  this->next_ip();
+std::uint8_t VM::readByte() {
+  this->nextIp();
   return *(this->ip);
 }
 
-std::uint16_t VM::read_two_bytes() {
-  return util::from_little_endian({this->read_byte(), this->read_byte()});
+std::uint16_t VM::readTwoBytes() {
+  return util::fromLittleEndian({this->readByte(), this->readByte()});
 }
 
 void VM::push(gc::Val val) {
@@ -63,6 +63,6 @@ void VM::jump(uint16_t jump) {
   this->ip = this->ip + jump;
 }
 
-gc::Val VM::read_const() {
-  return this->consts->at(this->read_two_bytes());
+gc::Val VM::readConst() {
+  return this->consts->at(this->readTwoBytes());
 }

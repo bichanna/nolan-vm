@@ -4,13 +4,13 @@ using namespace gc;
 
 Obj::Obj(std::string* str) {
   this->str = str;
-  this->obj_t = ObjType::String;
+  this->objType = ObjType::String;
   this->marked = false;
 }
 
 Obj::Obj(std::vector<Val>* list) {
   this->list = list;
-  this->obj_t = ObjType::List;
+  this->objType = ObjType::List;
   this->marked = false;
 }
 
@@ -19,9 +19,9 @@ void Obj::mark() {
 
   this->marked = true;
 
-  if (this->obj_t == ObjType::List) {
+  if (this->objType == ObjType::List) {
     for (auto elem : *(this->list)) {
-      if (elem.is_obj) {
+      if (elem.isObj) {
         elem.obj->mark();
       }
     }

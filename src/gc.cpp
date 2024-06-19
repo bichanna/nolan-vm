@@ -3,15 +3,15 @@
 
 using namespace gc;
 
-GC::GC(int max_obj_num) {
+GC::GC(int maxObjNum) {
   this->objs = {};
-  this->max_obj_num = max_obj_num;
+  this->maxObjNum = maxObjNum;
 }
 
 void GC::gc(std::vector<Val>* stack) {
   // Mark all
   for (auto value : *stack) {
-    if (value.is_obj) {
+    if (value.isObj) {
       value.obj->mark();
     }
   }
@@ -28,65 +28,65 @@ void GC::gc(std::vector<Val>* stack) {
     }
   }
 
-  this->max_obj_num = this->objs.size() * 2;
+  this->maxObjNum = this->objs.size() * 2;
 }
 
-Val GC::new_int(std::int64_t integer, std::vector<Val>* stack) {
-  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+Val GC::newInt(std::int64_t integer, std::vector<Val>* stack) {
+  if (this->objs.size() == this->maxObjNum) this->gc(stack);
 
   return Val {
     .integer = integer,
-    .is_obj = false
+    .isObj = false
   };
 }
 
-Val GC::new_float(double float_num, std::vector<Val>* stack) {
-  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+Val GC::newFloat(double floatNum, std::vector<Val>* stack) {
+  if (this->objs.size() == this->maxObjNum) this->gc(stack);
   
   return Val {
-    .float_num = float_num,
-    .is_obj = false
+    .floatNum = floatNum,
+    .isObj = false
   };
 }
 
-Val GC::new_bool(bool value, std::vector<Val>* stack) {
-  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+Val GC::newBool(bool value, std::vector<Val>* stack) {
+  if (this->objs.size() == this->maxObjNum) this->gc(stack);
   
   return Val {
     .boolean = value,
-    .is_obj = false
+    .isObj = false
   };
 }
 
-Val GC::new_void(std::vector<Val>* stack) {
-  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+Val GC::newVoid(std::vector<Val>* stack) {
+  if (this->objs.size() == this->maxObjNum) this->gc(stack);
 
   return Val {
-    .void_t = 0,
-    .is_obj = false
+    .voidVal = 0,
+    .isObj = false
   };
 }
 
-Val GC::new_str(std::string* str, std::vector<Val>* stack) {
-  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+Val GC::newStr(std::string* str, std::vector<Val>* stack) {
+  if (this->objs.size() == this->maxObjNum) this->gc(stack);
   
   auto obj = new Obj(str);
   this->objs.push_back(obj);
   
   return Val {
     .obj = obj,
-    .is_obj = true
+    .isObj = true
   };
 }
 
-Val GC::new_list(std::vector<Val>* list, std::vector<Val>* stack) {
-  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+Val GC::newList(std::vector<Val>* list, std::vector<Val>* stack) {
+  if (this->objs.size() == this->maxObjNum) this->gc(stack);
   
   auto obj = new Obj(list);
   this->objs.push_back(obj);
   
   return Val {
     .obj = obj,
-    .is_obj = true
+    .isObj = true
   };
 }

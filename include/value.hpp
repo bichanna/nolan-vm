@@ -16,7 +16,7 @@ namespace gc {
   class Obj {
   public:
     bool marked;
-    ObjType obj_t;
+    ObjType objType;
     union {
       std::string* str;
       std::vector<Val>* list;
@@ -31,11 +31,11 @@ namespace gc {
     union {
       Obj* obj;
       std::int64_t integer;
-      double float_num; /* I wish I could use std::float64_t here :( */
+      double floatNum; /* I wish I could use std::float64_t here :( */
       bool boolean;
-      char void_t;
+      char voidVal;
     };
-    bool is_obj;
+    bool isObj;
   };
 
 }
