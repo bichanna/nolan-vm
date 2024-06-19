@@ -21,6 +21,8 @@ namespace gc {
   private:
     std::list<Obj*> objs;
     int maxObjNum;
+
+    void mayPerformGC(std::vector<Val>* stack);
   };
 }
 

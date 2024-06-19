@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include "./value.hpp"
+#include "gc.hpp"
 
 #define INITIAL_STACK_SIZE 512
 
@@ -13,9 +14,9 @@ namespace vm {
   enum class OpCode : uint8_t {
     NoOp = 0,
     LoadConst,
-    INegate,
-    FNegate,
-    BNegate,
+    INeg,
+    FNeg,
+    BNeg,
     IAdd,
     FAdd,
     ISub,
@@ -28,16 +29,25 @@ namespace vm {
     Pop,
     PopN,
     InitList,
-    InitStr,
     Jump,
     LJump,
     JumpIfFalse,
-    Eq,
-    NEq,
-    GT,
-    LT,
-    GTEq,
-    LTEq,
+    BEq,
+    IEq,
+    FEq,
+    StrEq,
+    IGT,
+    FGT,
+    StrGT,
+    ILT,
+    FLT,
+    StrLT,
+    IGTEq,
+    FGTEq,
+    StrGTEq,
+    ILTEq,
+    FLTEq,
+    StrLTEq,
     And,
     Or,
     ILoad0,
@@ -57,9 +67,11 @@ namespace vm {
   class VM {
   public:
     VM(vector<gc::Val>* consts, vector<uint8_t>* instructions);
-    vector<string*> run();
+    ~VM();
+    vector<string*>* run();
   
   private:
+    gc::GC* gc;
     vector<uint8_t>::iterator ip;
     vector<gc::Val> stack;
     vector<gc::Val>* consts;
