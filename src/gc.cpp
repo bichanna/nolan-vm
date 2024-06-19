@@ -49,6 +49,24 @@ Val GC::new_float(double float_num, std::vector<Val>* stack) {
   };
 }
 
+Val GC::new_bool(bool value, std::vector<Val>* stack) {
+  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+  
+  return Val {
+    .boolean = value,
+    .is_obj = false
+  };
+}
+
+Val GC::new_void(std::vector<Val>* stack) {
+  if (this->objs.size() == this->max_obj_num) this->gc(stack);
+
+  return Val {
+    .void_t = 0,
+    .is_obj = false
+  };
+}
+
 Val GC::new_str(std::string* str, std::vector<Val>* stack) {
   if (this->objs.size() == this->max_obj_num) this->gc(stack);
   

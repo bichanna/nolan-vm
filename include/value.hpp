@@ -8,7 +8,7 @@
 namespace gc {
   struct Val;
 
-  enum ObjType {
+  enum class ObjType {
     String,
     List
   };
@@ -32,6 +32,8 @@ namespace gc {
       Obj* obj;
       std::int64_t integer;
       double float_num; /* I wish I could use std::float64_t here :( */
+      bool boolean;
+      char void_t;
     };
     bool is_obj;
   };
