@@ -8,9 +8,9 @@ GC::GC(int maxObjNum) {
   this->maxObjNum = maxObjNum;
 }
 
-void GC::gc(std::vector<Val>* stack) {
+void GC::gc(std::vector<Val>& stack) {
   // Mark all
-  for (auto value : *stack) {
+  for (auto value : stack) {
     if (value.isObj) {
       value.obj->mark();
     }
@@ -31,43 +31,35 @@ void GC::gc(std::vector<Val>* stack) {
   this->maxObjNum = this->objs.size() * 2;
 }
 
-Val GC::newInt(std::int64_t integer, std::vector<Val>* stack) {
-  this->mayPerformGC(stack);
-
+Val GC::newInt(std::int64_t integer) {
   return {
     .integer = integer,
     .isObj = false
   };
 }
 
-Val GC::newFloat(double floatNum, std::vector<Val>* stack) {
-  this->mayPerformGC(stack);
-  
+Val GC::newFloat(double floatNum) {
   return {
     .floatNum = floatNum,
     .isObj = false
   };
 }
 
-Val GC::newBool(bool value, std::vector<Val>* stack) {
-  this->mayPerformGC(stack);
-  
+Val GC::newBool(bool value) {
   return {
     .boolean = value,
     .isObj = false
   };
 }
 
-Val GC::newVoid(std::vector<Val>* stack) {
-  this->mayPerformGC(stack);
-
+Val GC::newVoid() {
   return {
     .voidVal = 0,
     .isObj = false
   };
 }
 
-Val GC::newStr(std::string* str, std::vector<Val>* stack) {
+Val GC::newStr(std::string* str, std::vector<Val>& stack) {
   this->mayPerformGC(stack);
   
   auto obj = new Obj(str);
@@ -79,7 +71,7 @@ Val GC::newStr(std::string* str, std::vector<Val>* stack) {
   };
 }
 
-Val GC::newList(std::vector<Val>* list, std::vector<Val>* stack) {
+Val GC::newList(std::vector<Val>* list, std::vector<Val>& stack) {
   this->mayPerformGC(stack);
 
   auto obj = new Obj(list);
@@ -91,7 +83,7 @@ Val GC::newList(std::vector<Val>* list, std::vector<Val>* stack) {
   };
 }
 
-void GC::mayPerformGC(std::vector<Val>* stack) {
+void GC::mayPerformGC(std::vector<Val>& stack) {
   if (this->objs.size() == static_cast<size_t>(this->maxObjNum))
     this->gc(stack);
 }

@@ -3,13 +3,16 @@
 
 #include <cstdint>
 #include <vector>
+#include <filesystem>
 #include "./value.hpp"
-#include "gc.hpp"
+#include "./gc.hpp"
 
 #define INITIAL_STACK_SIZE 512
+#define MAGIC_NUMBER 2006 + 2018 + 0422 + 0305
 
 namespace vm {
   using namespace std;
+  namespace fs = filesystem;
 
   enum class OpCode : uint8_t {
     NoOp = 0,
@@ -64,9 +67,25 @@ namespace vm {
     Halt = 255
   };
 
+  enum class ConstByteCode : uint8_t {
+    Str = 0,
+    Int8,
+    Int64,
+    Float,
+    Void,
+    ConstEnd = 255,
+  };
+
+  struct Program {
+    vector<gc::Val>* consts;
+    vector<uint8_t>* instructions;
+
+    Program();
+  };
+
   class VM {
   public:
-    VM(vector<gc::Val>* consts, vector<uint8_t>* instructions);
+    VM(fs::path filePath);
     ~VM();
     vector<string*>* run();
   
@@ -89,6 +108,12 @@ namespace vm {
     void jump(uint16_t jump);
     gc::Val readConst();
   };
+
+  Program readByteCodes(fs::path filePath, gc::GC* gc, vector<gc::Val>& stack);
+  bool createStr(string& str, vector<byte>::iterator& bi, vector<byte>::iterator end);
+  bool createInt8(int64_t& integer, vector<byte>::iterator& bi, vector<byte>::iterator end);
+  bool createInt64(int64_t& integer, vector<byte>::iterator& bi, vector<byte>::iterator end);
+  bool createFloat(double& floatNum, vector<byte>::iterator& bi, vector<byte>::iterator end);
 }
 
 #endif /* VM_H */
