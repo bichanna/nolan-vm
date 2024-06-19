@@ -5,10 +5,54 @@
 #include <vector>
 #include "./value.hpp"
 
-#define INITIAL_STACK_SIZE 256
+#define INITIAL_STACK_SIZE 512
 
 namespace vm {
   using namespace std;
+
+  enum class OpCode : uint8_t {
+    NoOp = 0,
+    LoadConst,
+    INegate,
+    FNegate,
+    BNegate,
+    IAdd,
+    FAdd,
+    ISub,
+    FSub,
+    IMul,
+    FMul,
+    FDiv,
+    IMod,
+    FMod,
+    Pop,
+    PopN,
+    InitList,
+    InitStr,
+    Jump,
+    LJump,
+    JumpIfFalse,
+    Eq,
+    NEq,
+    GT,
+    LT,
+    GTEq,
+    LTEq,
+    And,
+    Or,
+    ILoad0,
+    ILoad1,
+    ILoad2,
+    ILoad3,
+    FLoad0,
+    FLoad1,
+    FLoad2,
+    FLoad3,
+    LoadTrue,
+    LoadFalse,
+    LoadVoid,
+    Halt = 255
+  };
 
   class VM {
   public:

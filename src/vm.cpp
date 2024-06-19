@@ -16,7 +16,12 @@ VM::VM(std::vector<gc::Val>* consts, std::vector<uint8_t>* instructions) {
 }
 
 std::vector<string*> VM::run() {
-  /* TODO: implement this */
+  using namespace vm;
+
+  do {
+    switch (static_cast<OpCode>(*(this->ip))) {}
+  } while (this->next_ip());
+
   return this->errors;
 }
 
