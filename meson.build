@@ -3,9 +3,12 @@ project('NolanVM', 'cpp',
   license: 'MIT',
   default_options: [
     'warning_level=3',
-    'werror=true'
+    'werror=true',
+    'cpp_std=c++17'
   ]
 )
+
+add_project_arguments('-Wno-c++11-extensions', language: 'cpp')
 
 include=include_directories('include')
 
