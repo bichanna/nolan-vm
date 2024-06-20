@@ -2,21 +2,20 @@
 
 using namespace gc;
 
-Obj::Obj(std::string *str) {
+Obj::Obj(std::string* str) {
   this->str = str;
   this->objType = ObjType::String;
   this->marked = false;
 }
 
-Obj::Obj(std::vector<Val> *list) {
+Obj::Obj(std::vector<Val>* list) {
   this->list = list;
   this->objType = ObjType::List;
   this->marked = false;
 }
 
 void Obj::mark() {
-  if (this->marked)
-    return;
+  if (this->marked) return;
 
   this->marked = true;
 

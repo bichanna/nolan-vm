@@ -11,22 +11,22 @@ struct Val;
 enum class ObjType { String, List };
 
 class Obj {
-public:
+ public:
   bool marked;
   ObjType objType;
   union {
-    std::string *str;
-    std::vector<Val> *list;
+    std::string* str;
+    std::vector<Val>* list;
   };
 
-  Obj(std::string *str);
-  Obj(std::vector<Val> *list);
+  Obj(std::string* str);
+  Obj(std::vector<Val>* list);
   void mark();
 };
 
 struct Val {
   union {
-    Obj *obj;
+    Obj* obj;
     std::int64_t integer;
     double floatNum; /* I wish I could use std::float64_t here :( */
     bool boolean;
@@ -35,6 +35,6 @@ struct Val {
   bool isObj;
 };
 
-} // namespace gc
+}  // namespace gc
 
 #endif /* VALUE_H */

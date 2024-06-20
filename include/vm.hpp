@@ -1,11 +1,12 @@
 #ifndef VM_H
 #define VM_H
 
-#include "./gc.hpp"
-#include "./value.hpp"
 #include <cstdint>
 #include <filesystem>
 #include <vector>
+
+#include "./gc.hpp"
+#include "./value.hpp"
 
 #define INITIAL_STACK_SIZE 512
 #define MAGIC_NUMBER 2006 + 2018 + 0422 + 0305
@@ -78,25 +79,25 @@ enum class ConstByteCode : uint8_t {
 };
 
 struct Program {
-  vector<gc::Val> *consts;
-  vector<uint8_t> *instructions;
+  vector<gc::Val>* consts;
+  vector<uint8_t>* instructions;
 
   Program();
 };
 
 class VM {
-public:
+ public:
   VM(fs::path filePath);
   ~VM();
-  vector<string *> *run();
+  vector<string*>* run();
 
-private:
-  gc::GC *gc;
+ private:
+  gc::GC* gc;
   vector<uint8_t>::iterator ip;
   vector<gc::Val> stack;
-  vector<gc::Val> *consts;
-  vector<uint8_t> *instructions;
-  vector<string *> errors;
+  vector<gc::Val>* consts;
+  vector<uint8_t>* instructions;
+  vector<string*> errors;
 
   bool nextIp();
 
@@ -110,15 +111,11 @@ private:
   gc::Val readConst();
 };
 
-Program readByteCodes(fs::path filePath, gc::GC *gc, vector<gc::Val> &stack);
-bool createStr(string &str, vector<byte>::iterator &bi,
-               vector<byte>::iterator end);
-bool createInt8(int64_t &integer, vector<byte>::iterator &bi,
-                vector<byte>::iterator end);
-bool createInt64(int64_t &integer, vector<byte>::iterator &bi,
-                 vector<byte>::iterator end);
-bool createFloat(double &floatNum, vector<byte>::iterator &bi,
-                 vector<byte>::iterator end);
-} // namespace vm
+Program readByteCodes(fs::path filePath, gc::GC* gc, vector<gc::Val>& stack);
+bool createStr(string& str, vector<byte>::iterator& bi, vector<byte>::iterator end);
+bool createInt8(int64_t& integer, vector<byte>::iterator& bi, vector<byte>::iterator end);
+bool createInt64(int64_t& integer, vector<byte>::iterator& bi, vector<byte>::iterator end);
+bool createFloat(double& floatNum, vector<byte>::iterator& bi, vector<byte>::iterator end);
+}  // namespace vm
 
 #endif /* VM_H */
