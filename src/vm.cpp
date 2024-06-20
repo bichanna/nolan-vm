@@ -217,6 +217,8 @@ VM::VM(fs::path filePath) {
   this->consts = program.consts;
   this->instructions = program.instructions;
 
+  this->globals = {};
+
   this->errors = {};
 
   this->ip = this->instructions->begin();
@@ -398,6 +400,14 @@ std::vector<string*>* VM::run() {
       case OpCode::LoadVoid:
         this->push(this->gc->newVoid());
         break;
+      case OpCode::SetGlobal:
+        this->setGlobal(this->readConst(), this->readConst());
+        break;
+      case OpCode::GetGlobal: {
+        gc::Val name = this->readConst();
+        this->getGlobal(name);
+        break;
+      }
       case OpCode::Halt:
         halt = true;
         break;
@@ -443,3 +453,7 @@ gc::Val VM::peek(uint8_t peek) { return this->stack.at(this->stack.size() - 1 - 
 void VM::jump(uint16_t jump) { this->ip = this->ip + jump; }
 
 gc::Val VM::readConst() { return this->consts->at(this->readTwoBytes()); }
+
+void VM::setGlobal(gc::Val name, gc::Val value) { this->globals.insert_or_assign(name, value); }
+
+gc::Val VM::getGlobal(gc::Val& name) { return this->globals.at(name); }

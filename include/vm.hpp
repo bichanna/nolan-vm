@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <unordered_map>
 #include <vector>
 
 #include "./gc.hpp"
@@ -66,6 +67,8 @@ enum class OpCode : uint8_t {
   LoadTrue,
   LoadFalse,
   LoadVoid,
+  SetGlobal,
+  GetGlobal,
   Halt = 255
 };
 
@@ -97,6 +100,7 @@ class VM {
   vector<gc::Val> stack;
   vector<gc::Val>* consts;
   vector<uint8_t>* instructions;
+  unordered_map<gc::Val, gc::Val> globals;  // The key is always a string.
   vector<string*> errors;
 
   bool nextIp();
@@ -109,6 +113,8 @@ class VM {
   gc::Val peek(uint8_t peek);
   void jump(uint16_t jump);
   gc::Val readConst();
+  void setGlobal(gc::Val name, gc::Val newValue);
+  gc::Val getGlobal(gc::Val& name);
 };
 
 Program readByteCodes(fs::path filePath, gc::GC* gc, vector<gc::Val>& stack);
