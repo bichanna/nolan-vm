@@ -408,6 +408,12 @@ std::vector<string*>* VM::run() {
         this->getGlobal(name);
         break;
       }
+      case OpCode::SetLocal:
+        this->stack.at(this->readByte()) = this->peek(0);
+        break;
+      case OpCode::GetLocal:
+        this->push(this->stack.at(this->readByte()));
+        break;
       case OpCode::Halt:
         halt = true;
         break;
@@ -454,6 +460,6 @@ void VM::jump(uint16_t jump) { this->ip = this->ip + jump; }
 
 gc::Val VM::readConst() { return this->consts->at(this->readTwoBytes()); }
 
-void VM::setGlobal(gc::Val name, gc::Val value) { this->globals.insert_or_assign(name, value); }
+void VM::setGlobal(gc::Val name, gc::Val value) { this->globals.insert_or_assign(*name.obj->str, value); }
 
-gc::Val VM::getGlobal(gc::Val& name) { return this->globals.at(name); }
+gc::Val VM::getGlobal(gc::Val& name) { return this->globals.at(*name.obj->str); }

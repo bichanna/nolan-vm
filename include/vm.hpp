@@ -9,7 +9,7 @@
 #include "./gc.hpp"
 #include "./value.hpp"
 
-#define INITIAL_STACK_SIZE 512
+#define INITIAL_STACK_SIZE 256
 #define MAGIC_NUMBER 2006 + 2018 + 0422 + 0305
 
 namespace vm {
@@ -69,6 +69,8 @@ enum class OpCode : uint8_t {
   LoadVoid,
   SetGlobal,
   GetGlobal,
+  SetLocal,
+  GetLocal,
   Halt = 255
 };
 
@@ -100,7 +102,7 @@ class VM {
   vector<gc::Val> stack;
   vector<gc::Val>* consts;
   vector<uint8_t>* instructions;
-  unordered_map<gc::Val, gc::Val> globals;  // The key is always a string.
+  unordered_map<std::string, gc::Val> globals;  // The key is always a string.
   vector<string*> errors;
 
   bool nextIp();
