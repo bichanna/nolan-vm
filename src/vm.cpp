@@ -266,6 +266,13 @@ std::vector<string*>* VM::run() {
       case OpCode::FAdd:
         this->push(this->gc->newFloat(this->pop().floatNum + this->pop().floatNum));
         break;
+      case OpCode::SAdd:
+        {
+          std::string* str = this->pop().obj->str;
+          str->append(*this->pop().obj->str);
+          this->push(this->gc->newStr(str, stack));
+          break;
+        }
       case OpCode::ISub:
         this->push(this->gc->newInt(this->pop().integer - this->pop().integer));
         break;

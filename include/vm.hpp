@@ -22,6 +22,7 @@ namespace vm {
     BNeg,
     IAdd,
     FAdd,
+    SAdd,
     ISub,
     FSub,
     IMul,
