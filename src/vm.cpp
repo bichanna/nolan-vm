@@ -39,8 +39,6 @@ Program vm::readByteCodes(fs::path filePath, gc::GC* gc, std::vector<gc::Val>& s
   }
 
   Program program{};
-  program.consts = new std::vector<gc::Val>();
-  program.instructions = new std::vector<uint8_t>();
 
   std::vector<std::byte> bytes{fileSize};
   file.read(reinterpret_cast<char*>(bytes.data()), fileSize);
@@ -412,8 +410,9 @@ std::vector<string*>* VM::run() {
 }
 
 bool VM::nextIp() {
-  this->ip = this->ip + 1;
-  return this->ip != this->instructions->end();
+  if (this->ip == this->instructions->end()) return false;
+  this->ip++;
+  return true;
 }
 
 std::uint8_t VM::readByte() {

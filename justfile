@@ -18,5 +18,9 @@ release:
   meson setup --buildtype=release {{BUILD_DIR}}
   meson compile -C {{BUILD_DIR}}
 
+format:
+  clang-format -i ./**/*.cpp
+  clang-format -i ./**/*.hpp
+
 clean:
   rm -rf {{BUILD_DIR}}
