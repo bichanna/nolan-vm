@@ -4,7 +4,7 @@ using namespace gc;
 
 Obj::Obj(std::string* str) {
   this->str = str;
-  this->objType = ObjType::String;
+  this->objType = ObjType::Str;
   this->marked = false;
 }
 
@@ -21,7 +21,7 @@ void Obj::mark() {
 
   if (this->objType == ObjType::List) {
     for (auto elem : *(this->list)) {
-      if (elem.isObj) {
+      if (elem.valType == gc::ValType::Obj) {
         elem.obj->mark();
       }
     }

@@ -12,7 +12,7 @@ GC::GC(int maxObjNum) {
 void GC::gc(std::vector<Val>& stack) {
   // Mark all
   for (auto value : stack) {
-    if (value.isObj) {
+    if (value.valType == gc::ValType::Obj) {
       value.obj->mark();
     }
   }
@@ -32,13 +32,13 @@ void GC::gc(std::vector<Val>& stack) {
   this->maxObjNum = this->objs.size() * 2;
 }
 
-Val GC::newInt(std::int64_t integer) { return {.integer = integer, .isObj = false}; }
+Val GC::newInt(std::int64_t integer) { return {.integer = integer, .valType = gc::ValType::Int}; }
 
-Val GC::newFloat(double floatNum) { return {.floatNum = floatNum, .isObj = false}; }
+Val GC::newFloat(double floatNum) { return {.floatNum = floatNum, .valType = gc::ValType::Float}; }
 
-Val GC::newBool(bool value) { return {.boolean = value, .isObj = false}; }
+Val GC::newBool(bool value) { return {.boolean = value, .valType = gc::ValType::Bool}; }
 
-Val GC::newVoid() { return {.voidVal = 0, .isObj = false}; }
+Val GC::newVoid() { return {.voidVal = 0, .valType = gc::ValType::Void}; }
 
 Val GC::newStr(std::string* str, std::vector<Val>& stack) {
   this->mayPerformGC(stack);
@@ -46,7 +46,7 @@ Val GC::newStr(std::string* str, std::vector<Val>& stack) {
   auto obj = new Obj(str);
   this->objs.push_back(obj);
 
-  return {.obj = obj, .isObj = true};
+  return {.obj = obj, .valType = gc::ValType::Obj};
 }
 
 Val GC::newList(std::vector<Val>* list, std::vector<Val>& stack) {
@@ -55,7 +55,7 @@ Val GC::newList(std::vector<Val>* list, std::vector<Val>& stack) {
   auto obj = new Obj(list);
   this->objs.push_back(obj);
 
-  return {.obj = obj, .isObj = true};
+  return {.obj = obj, .valType = gc::ValType::Obj};
 }
 
 void GC::mayPerformGC(std::vector<Val>& stack) {

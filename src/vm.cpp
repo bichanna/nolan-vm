@@ -6,6 +6,7 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
+#include <sstream>
 
 #include "../include/util.hpp"
 
@@ -219,8 +220,6 @@ VM::VM(fs::path filePath) {
 
   this->globals = {};
 
-  this->errors = {};
-
   this->ip = this->instructions->begin();
 }
 
@@ -235,67 +234,189 @@ VM::~VM() {
   this->instructions = nullptr;
 }
 
-std::vector<string*>* VM::run() {
+std::string VM::run() {
   using namespace vm;
 
   bool halt = false;
+  std::stringstream errorMsg{};
 
   do {
     OpCode opcode = static_cast<OpCode>(*(this->ip));
     switch (opcode) {
       case OpCode::NoOp:
         break;
+
       case OpCode::LoadConst:
         this->push(this->readConst());
         break;
-      case OpCode::INeg:
-        this->push(this->gc->newInt(-(this->pop().integer)));
+
+      case OpCode::INeg: {
+        gc::Val val = this->pop();
+        CHECK_TYPE(
+            val, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newInt(-(val.integer)));
         break;
-      case OpCode::FNeg:
-        this->push(this->gc->newFloat(-(this->pop().floatNum)));
+      }
+
+      case OpCode::FNeg: {
+        gc::Val val = this->pop();
+        CHECK_TYPE(
+            val, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newFloat(-(val.floatNum)));
         break;
-      case OpCode::BNeg:
-        this->push(this->gc->newBool(!(this->pop().boolean)));
+      }
+
+      case OpCode::BNeg: {
+        gc::Val val = this->pop();
+        CHECK_TYPE(
+            val, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(!(val.boolean)));
         break;
-      case OpCode::IAdd:
-        this->push(this->gc->newInt(this->pop().integer + this->pop().integer));
+      }
+
+      case OpCode::IAdd: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newInt(val1.integer + val2.integer));
         break;
-      case OpCode::FAdd:
-        this->push(this->gc->newFloat(this->pop().floatNum + this->pop().floatNum));
+      }
+
+      case OpCode::FAdd: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newFloat(val1.floatNum + val2.floatNum));
         break;
+      }
+
       case OpCode::SAdd: {
-        std::string* str = this->pop().obj->str;
-        str->append(*this->pop().obj->str);
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_OBJ_TYPE(
+            val1, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_OBJ_TYPE(
+            val2, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        std::string* str = val1.obj->str;
+        val1.obj->str->append(*val2.obj->str);
         this->push(this->gc->newStr(str, stack));
         break;
       }
-      case OpCode::ISub:
-        this->push(this->gc->newInt(this->pop().integer - this->pop().integer));
+
+      case OpCode::ISub: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newInt(val1.integer - val2.integer));
         break;
-      case OpCode::FSub:
-        this->push(this->gc->newFloat(this->pop().floatNum - this->pop().floatNum));
+      }
+
+      case OpCode::FSub: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newFloat(val1.floatNum - val2.floatNum));
         break;
-      case OpCode::IMul:
-        this->push(this->gc->newInt(this->pop().integer * this->pop().integer));
+      }
+
+      case OpCode::IMul: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newInt(val1.integer * val2.integer));
         break;
-      case OpCode::FMul:
-        this->push(this->gc->newFloat(this->pop().floatNum * this->pop().floatNum));
+      }
+
+      case OpCode::FMul: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newFloat(val1.floatNum * val2.floatNum));
         break;
-      case OpCode::FDiv:
-        this->push(this->gc->newFloat(this->pop().floatNum / this->pop().floatNum));
+      }
+
+      case OpCode::FDiv: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newFloat(val1.floatNum / val2.floatNum));
         break;
-      case OpCode::IMod:
-        this->push(this->gc->newInt(this->pop().integer % this->pop().integer));
+      }
+
+      case OpCode::IMod: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newInt(val1.integer % val2.integer));
         break;
-      case OpCode::FMod:
-        this->push(this->gc->newFloat(fmod(this->pop().floatNum, this->pop().floatNum)));
+      }
+
+      case OpCode::FMod: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newFloat(fmod(val1.floatNum, val2.floatNum)));
         break;
+      }
+
       case OpCode::Pop:
         this->pop();
         break;
+
       case OpCode::PopN:
         this->pop(this->readByte());
         break;
+
       case OpCode::InitList: {
         int length = this->readByte();
         std::vector<gc::Val>* list = new std::vector<gc::Val>();
@@ -304,125 +425,331 @@ std::vector<string*>* VM::run() {
         this->push(this->gc->newList(list, this->stack));
         break;
       }
+
       case OpCode::Jump:
         this->jump(this->readByte());
         break;
+
       case OpCode::LJump:
         this->jump(this->readTwoBytes());
         break;
-      case OpCode::JumpIfFalse:
-        if (!this->pop().boolean) this->jump(this->readTwoBytes());
+
+      case OpCode::JumpIfFalse: {
+        gc::Val val1 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        if (!val1.boolean) this->jump(this->readTwoBytes());
         break;
-      case OpCode::BEq:
-        this->push(this->gc->newBool(this->pop().boolean == this->pop().boolean));
+      }
+
+      case OpCode::BEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.boolean == val2.boolean));
         break;
-      case OpCode::IEq:
-        this->push(this->gc->newBool(this->pop().integer == this->pop().integer));
+      }
+
+      case OpCode::IEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.integer == val2.integer));
         break;
-      case OpCode::FEq:
-        this->push(this->gc->newBool(this->pop().floatNum == this->pop().floatNum));
+      }
+
+      case OpCode::FEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.floatNum == val2.floatNum));
         break;
-      case OpCode::StrEq:
-        this->push(this->gc->newBool(*(this->pop().obj->str) == *(this->pop().obj->str)));
+      }
+
+      case OpCode::StrEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_OBJ_TYPE(
+            val1, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_OBJ_TYPE(
+            val2, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(*(val1.obj->str) == *(val2.obj->str)));
         break;
-      case OpCode::IGT:
-        this->push(this->gc->newBool(this->pop().integer > this->pop().integer));
+      }
+
+      case OpCode::IGT: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.integer > val2.integer));
         break;
-      case OpCode::FGT:
-        this->push(this->gc->newBool(this->pop().floatNum > this->pop().floatNum));
+      }
+
+      case OpCode::FGT: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.floatNum > val2.floatNum));
         break;
-      case OpCode::StrGT:
-        this->push(this->gc->newBool((this->pop().obj->str->compare(*this->pop().obj->str) > 0)));
+      }
+
+      case OpCode::StrGT: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_OBJ_TYPE(
+            val1, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_OBJ_TYPE(
+            val2, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool((val1.obj->str->compare(*val2.obj->str) > 0)));
         break;
-      case OpCode::ILT:
-        this->push(this->gc->newBool(this->pop().integer < this->pop().integer));
+      }
+
+      case OpCode::ILT: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.integer < val2.integer));
         break;
-      case OpCode::FLT:
-        this->push(this->gc->newBool(this->pop().floatNum < this->pop().floatNum));
+      }
+
+      case OpCode::FLT: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.floatNum < val2.floatNum));
         break;
-      case OpCode::StrLT:
-        this->push(this->gc->newBool((this->pop().obj->str->compare(*this->pop().obj->str) < 0)));
+      }
+
+      case OpCode::StrLT: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_OBJ_TYPE(
+            val1, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_OBJ_TYPE(
+            val2, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool((val1.obj->str->compare(*val2.obj->str) < 0)));
         break;
-      case OpCode::IGTEq:
-        this->push(this->gc->newBool(this->pop().integer > this->pop().integer));
+      }
+
+      case OpCode::IGTEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.integer > val2.integer));
         break;
-      case OpCode::FGTEq:
-        this->push(this->gc->newBool(this->pop().floatNum > this->pop().floatNum));
+      }
+
+      case OpCode::FGTEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.floatNum > val2.floatNum));
         break;
-      case OpCode::StrGTEq:
-        this->push(this->gc->newBool((this->pop().obj->str->compare(*this->pop().obj->str) >= 0)));
+      }
+
+      case OpCode::StrGTEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_OBJ_TYPE(
+            val1, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_OBJ_TYPE(
+            val2, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool((val1.obj->str->compare(*val2.obj->str) >= 0)));
         break;
-      case OpCode::ILTEq:
-        this->push(this->gc->newBool(this->pop().integer < this->pop().integer));
+      }
+
+      case OpCode::ILTEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Int,
+            "Expected an integer for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.integer < val2.integer));
         break;
-      case OpCode::FLTEq:
-        this->push(this->gc->newBool(this->pop().floatNum < this->pop().floatNum));
+      }
+
+      case OpCode::FLTEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Float,
+            "Expected a float for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.floatNum < val2.floatNum));
         break;
-      case OpCode::StrLTEq:
-        this->push(this->gc->newBool((this->pop().obj->str->compare(*this->pop().obj->str) <= 0)));
+      }
+
+      case OpCode::StrLTEq: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_OBJ_TYPE(
+            val1, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_OBJ_TYPE(
+            val2, gc::ObjType::Str,
+            "Expected a string for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool((val1.obj->str->compare(*val2.obj->str) <= 0)));
         break;
-      case OpCode::And:
-        this->push(this->gc->newBool(this->pop().boolean && this->pop().boolean));
+      }
+      case OpCode::And: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        this->push(this->gc->newBool(val1.boolean && val2.boolean));
         break;
-      case OpCode::Or:
+      }
+
+      case OpCode::Or: {
+        gc::Val val1 = this->pop();
+        gc::Val val2 = this->pop();
+        CHECK_TYPE(
+            val1, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
+        CHECK_TYPE(
+            val2, gc::ValType::Bool,
+            "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
         this->push(this->gc->newBool(this->pop().boolean || this->pop().boolean));
         break;
+      }
+
       case OpCode::ILoad0:
         this->push(this->gc->newInt(0));
         break;
+
       case OpCode::ILoad1:
         this->push(this->gc->newInt(1));
         break;
+
       case OpCode::ILoad2:
         this->push(this->gc->newInt(2));
         break;
+
       case OpCode::ILoad3:
         this->push(this->gc->newInt(3));
         break;
+
       case OpCode::FLoad0:
         this->push(this->gc->newFloat(0.0));
         break;
+
       case OpCode::FLoad1:
         this->push(this->gc->newFloat(1.0));
         break;
+
       case OpCode::FLoad2:
         this->push(this->gc->newFloat(2.0));
         break;
+
       case OpCode::FLoad3:
         this->push(this->gc->newFloat(3.0));
         break;
+
       case OpCode::LoadTrue:
         this->push(this->gc->newBool(true));
         break;
+
       case OpCode::LoadFalse:
         this->push(this->gc->newBool(false));
         break;
+
       case OpCode::LoadVoid:
         this->push(this->gc->newVoid());
         break;
+
       case OpCode::SetGlobal:
         this->setGlobal(this->readConst(), this->readConst());
         break;
+
       case OpCode::GetGlobal: {
         gc::Val name = this->readConst();
         this->getGlobal(name);
         break;
       }
+
       case OpCode::SetLocal:
         this->stack.at(this->readByte()) = this->peek(0);
         break;
+
       case OpCode::GetLocal:
         this->push(this->stack.at(this->readByte()));
         break;
+
       case OpCode::Halt:
         halt = true;
         break;
+
       default:
-        return &this->errors;
+        errorMsg << "Invalid opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode));
+        halt = true;
+        break;
     }
   } while (this->nextIp() && (!halt));
 
-  return &this->errors;
+  return errorMsg.str();
 }
 
 bool VM::nextIp() {
@@ -460,6 +787,8 @@ void VM::jump(uint16_t jump) { this->ip = this->ip + jump; }
 
 gc::Val VM::readConst() { return this->consts->at(this->readTwoBytes()); }
 
-void VM::setGlobal(gc::Val name, gc::Val value) { this->globals.insert_or_assign(*name.obj->str, value); }
+void VM::setGlobal(gc::Val name, gc::Val value) {
+  this->globals.insert_or_assign(*name.obj->str, value);
+}
 
 gc::Val VM::getGlobal(gc::Val& name) { return this->globals.at(*name.obj->str); }

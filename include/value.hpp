@@ -8,7 +8,8 @@
 namespace gc {
 struct Val;
 
-enum class ObjType { String, List };
+enum class ObjType { Str, List };
+enum class ValType { Int, Float, Bool, Void, Obj };
 
 class Obj {
  public:
@@ -32,7 +33,7 @@ struct Val {
     bool boolean;
     char voidVal;
   };
-  bool isObj;
+  ValType valType;
 };
 
 }  // namespace gc

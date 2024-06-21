@@ -12,6 +12,22 @@
 #define INITIAL_STACK_SIZE 256
 #define MAGIC_NUMBER 2006 + 2018 + 0422 + 0305
 
+#define HEX_FORMAT(u8) "0x" << std::setw(2) << std::setfill('0') << std::hex << u8
+
+#define CHECK_TYPE(val, type, errMsg) \
+  if (val.valType != type) {          \
+    errorMsg << errMsg;               \
+    halt = true;                      \
+    break;                            \
+  }
+
+#define CHECK_OBJ_TYPE(val, type, errMsg)                            \
+  if (val.valType != gc::ValType::Obj || val.obj->objType != type) { \
+    errorMsg << errMsg;                                              \
+    halt = true;                                                     \
+    break;                                                           \
+  }
+
 namespace vm {
 using namespace std;
 namespace fs = filesystem;
@@ -94,7 +110,7 @@ class VM {
  public:
   VM(fs::path filePath);
   ~VM();
-  vector<string*>* run();
+  string run();
 
  private:
   gc::GC* gc;
@@ -103,7 +119,6 @@ class VM {
   vector<gc::Val>* consts;
   vector<uint8_t>* instructions;
   unordered_map<std::string, gc::Val> globals;  // The key is always a string.
-  vector<string*> errors;
 
   bool nextIp();
 
