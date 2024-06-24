@@ -8,20 +8,28 @@
 namespace gc {
 struct Val;
 
-enum class ObjType { Str, List };
+enum class ObjType { Str, List, Func };
 enum class ValType { Int, Float, Bool, Void, Obj };
 
 class Obj {
  public:
+  struct Func {
+    Obj* name;
+    std::vector<std::uint8_t>::iterator startingIp;
+    std::uint8_t arity;
+  };
+
   bool marked;
   ObjType objType;
   union {
     std::string* str;
     std::vector<Val>* list;
+    Func func;
   };
 
   Obj(std::string* str);
   Obj(std::vector<Val>* list);
+  Obj(Obj* name, std::vector<std::uint8_t>::iterator startingIp, std::uint8_t arity);
   void mark();
 };
 

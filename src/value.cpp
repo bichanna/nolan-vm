@@ -14,16 +14,26 @@ Obj::Obj(std::vector<Val>* list) {
   this->marked = false;
 }
 
+Obj::Obj(Obj* name, std::vector<std::uint8_t>::iterator startingIp, std::uint8_t arity) {
+  this->func = {.name = name, .startingIp = startingIp, .arity = arity};
+  this->objType = ObjType::Func;
+  this->marked = false;
+}
+
 void Obj::mark() {
   if (this->marked) return;
 
   this->marked = true;
 
-  if (this->objType == ObjType::List) {
-    for (auto elem : *(this->list)) {
-      if (elem.valType == gc::ValType::Obj) {
-        elem.obj->mark();
-      }
-    }
+  switch (this->objType) {
+    case ObjType::List:
+      for (auto elem : *(this->list))
+        if (elem.valType == gc::ValType::Obj) elem.obj->mark();
+      break;
+    case ObjType::Func:
+      this->func.name->mark();
+      break;
+    default:
+      break;
   }
 }

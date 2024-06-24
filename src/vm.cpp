@@ -220,7 +220,10 @@ VM::VM(fs::path filePath) {
 
   this->globals = {};
 
-  this->ip = this->instructions->begin();
+  this->frames = {};
+  this->frames.reserve(FRAMES_MAX);
+
+  this->frames.push_back({this->instructions->end(), this->instructions->begin(), 0});
 }
 
 VM::~VM() {
@@ -240,14 +243,18 @@ std::string VM::run() {
   bool halt = false;
   std::stringstream errorMsg{};
 
+  CallFrame* frame = nullptr;
+
   do {
-    OpCode opcode = static_cast<OpCode>(*(this->ip));
+    frame = &this->frames.back();
+    OpCode opcode = static_cast<OpCode>(*(frame->ip));
+
     switch (opcode) {
       case OpCode::NoOp:
         break;
 
       case OpCode::LoadConst:
-        this->push(this->readConst());
+        this->push(this->readConst(*frame));
         break;
 
       case OpCode::INeg: {
@@ -414,24 +421,24 @@ std::string VM::run() {
         break;
 
       case OpCode::PopN:
-        this->pop(this->readByte());
+        this->pop(this->readByte(*frame));
         break;
 
       case OpCode::InitList: {
-        int length = this->readByte();
+        int length = this->readByte(*frame);
         std::vector<gc::Val>* list = new std::vector<gc::Val>();
         list->reserve(length);
-        for (int i = 0; i < length; i++) list->push_back(this->readConst());
+        for (int i = 0; i < length; i++) list->push_back(this->readConst(*frame));
         this->push(this->gc->newList(list, this->stack));
         break;
       }
 
       case OpCode::Jump:
-        this->jump(this->readByte());
+        this->jump(*frame, this->readByte(*frame));
         break;
 
       case OpCode::LJump:
-        this->jump(this->readTwoBytes());
+        this->jump(*frame, this->readTwoBytes(*frame));
         break;
 
       case OpCode::JumpIfFalse: {
@@ -439,7 +446,7 @@ std::string VM::run() {
         CHECK_TYPE(
             val1, gc::ValType::Bool,
             "Expected a boolean for this opcode: " << HEX_FORMAT(static_cast<uint8_t>(opcode)));
-        if (!val1.boolean) this->jump(this->readTwoBytes());
+        if (!val1.boolean) this->jump(*frame, this->readTwoBytes(*frame));
         break;
       }
 
@@ -721,21 +728,21 @@ std::string VM::run() {
         break;
 
       case OpCode::SetGlobal:
-        this->setGlobal(this->readConst(), this->readConst());
+        this->setGlobal(this->readConst(*frame), this->readConst(*frame));
         break;
 
       case OpCode::GetGlobal: {
-        gc::Val name = this->readConst();
+        gc::Val name = this->readConst(*frame);
         this->getGlobal(name);
         break;
       }
 
       case OpCode::SetLocal:
-        this->stack.at(this->readByte()) = this->peek(0);
+        this->stack.at(this->readByte(*frame)) = this->peek(0);
         break;
 
       case OpCode::GetLocal:
-        this->push(this->stack.at(this->readByte()));
+        this->push(this->stack.at(this->readByte(*frame)));
         break;
 
       case OpCode::Halt:
@@ -747,24 +754,24 @@ std::string VM::run() {
         halt = true;
         break;
     }
-  } while (this->nextIp() && (!halt));
+  } while (this->nextIp(*frame) && (!halt));
 
   return errorMsg.str();
 }
 
-bool VM::nextIp() {
-  if (this->ip == this->instructions->end()) return false;
-  this->ip++;
+bool VM::nextIp(CallFrame& frame) {
+  if (frame.ip == this->instructions->end()) return false;
+  frame.ip++;
   return true;
 }
 
-std::uint8_t VM::readByte() {
-  this->nextIp();
-  return *(this->ip);
+std::uint8_t VM::readByte(CallFrame& frame) {
+  this->nextIp(frame);
+  return *(frame.ip);
 }
 
-std::uint16_t VM::readTwoBytes() {
-  return util::fromLittleEndian({this->readByte(), this->readByte()});
+std::uint16_t VM::readTwoBytes(CallFrame& frame) {
+  return util::fromLittleEndian({this->readByte(frame), this->readByte(frame)});
 }
 
 void VM::push(gc::Val val) { this->stack.push_back(val); }
@@ -783,9 +790,9 @@ void VM::pop(int num) {
 
 gc::Val VM::peek(uint8_t peek) { return this->stack.at(this->stack.size() - 1 - peek); }
 
-void VM::jump(uint16_t jump) { this->ip = this->ip + jump; }
+void VM::jump(CallFrame& frame, int32_t jump) { frame.ip = frame.ip + jump; }
 
-gc::Val VM::readConst() { return this->consts->at(this->readTwoBytes()); }
+gc::Val VM::readConst(CallFrame& frame) { return this->consts->at(this->readTwoBytes(frame)); }
 
 void VM::setGlobal(gc::Val name, gc::Val value) {
   this->globals.insert_or_assign(*name.obj->str, value);

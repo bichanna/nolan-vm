@@ -58,6 +58,16 @@ Val GC::newList(std::vector<Val>* list, std::vector<Val>& stack) {
   return {.obj = obj, .valType = gc::ValType::Obj};
 }
 
+Val GC::newFunc(Obj* name, std::vector<std::uint8_t>::iterator startingIp, std::uint8_t arity,
+                std::vector<Val>& stack) {
+  this->mayPerformGC(stack);
+
+  auto obj = new Obj(name, startingIp, arity);
+  this->objs.push_back(obj);
+
+  return {.obj = obj, .valType = gc::ValType::Obj};
+}
+
 void GC::mayPerformGC(std::vector<Val>& stack) {
   if (this->objs.size() == static_cast<size_t>(this->maxObjNum)) this->gc(stack);
 }
