@@ -56,7 +56,6 @@ Val GC::newBool(bool value) {
 Val GC::newVoid() {
   Val v{};
   v.valType = gc::ValType::Void;
-  v.voidVal = 0;
   return v;
 }
 

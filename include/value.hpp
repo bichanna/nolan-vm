@@ -40,7 +40,6 @@ struct Val {
     std::int64_t integer;
     double floatNum; /* I wish I could use std::float64_t here :( */
     bool boolean;
-    char voidVal;
   };
 };
 
