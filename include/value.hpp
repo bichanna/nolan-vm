@@ -34,6 +34,7 @@ class Obj {
 };
 
 struct Val {
+  ValType valType;
   union {
     Obj* obj;
     std::int64_t integer;
@@ -41,7 +42,6 @@ struct Val {
     bool boolean;
     char voidVal;
   };
-  ValType valType;
 };
 
 }  // namespace gc

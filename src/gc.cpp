@@ -32,13 +32,33 @@ void GC::gc(std::vector<Val>& stack) {
   this->maxObjNum = this->objs.size() * 2;
 }
 
-Val GC::newInt(std::int64_t integer) { return {.integer = integer, .valType = gc::ValType::Int}; }
+Val GC::newInt(std::int64_t integer) {
+  Val v{};
+  v.valType = gc::ValType::Int;
+  v.integer = integer;
+  return v;
+}
 
-Val GC::newFloat(double floatNum) { return {.floatNum = floatNum, .valType = gc::ValType::Float}; }
+Val GC::newFloat(double floatNum) {
+  Val v{};
+  v.valType = gc::ValType::Float;
+  v.floatNum = floatNum;
+  return v;
+}
 
-Val GC::newBool(bool value) { return {.boolean = value, .valType = gc::ValType::Bool}; }
+Val GC::newBool(bool value) {
+  Val v{};
+  v.valType = gc::ValType::Bool;
+  v.boolean = value;
+  return v;
+}
 
-Val GC::newVoid() { return {.voidVal = 0, .valType = gc::ValType::Void}; }
+Val GC::newVoid() {
+  Val v{};
+  v.valType = gc::ValType::Void;
+  v.voidVal = 0;
+  return v;
+}
 
 Val GC::newStr(std::string* str, std::vector<Val>& stack) {
   this->mayPerformGC(stack);
@@ -46,7 +66,11 @@ Val GC::newStr(std::string* str, std::vector<Val>& stack) {
   auto obj = new Obj(str);
   this->objs.push_back(obj);
 
-  return {.obj = obj, .valType = gc::ValType::Obj};
+  Val v{};
+  v.valType = gc::ValType::Obj;
+  v.obj = obj;
+
+  return v;
 }
 
 Val GC::newList(std::vector<Val>* list, std::vector<Val>& stack) {
@@ -55,7 +79,11 @@ Val GC::newList(std::vector<Val>* list, std::vector<Val>& stack) {
   auto obj = new Obj(list);
   this->objs.push_back(obj);
 
-  return {.obj = obj, .valType = gc::ValType::Obj};
+  Val v{};
+  v.valType = gc::ValType::Obj;
+  v.obj = obj;
+
+  return v;
 }
 
 Val GC::newFunc(Obj* name, std::vector<std::uint8_t>::iterator startingIp, std::uint8_t arity,
@@ -65,7 +93,11 @@ Val GC::newFunc(Obj* name, std::vector<std::uint8_t>::iterator startingIp, std::
   auto obj = new Obj(name, startingIp, arity);
   this->objs.push_back(obj);
 
-  return {.obj = obj, .valType = gc::ValType::Obj};
+  Val v{};
+  v.valType = gc::ValType::Obj;
+  v.obj = obj;
+
+  return v;
 }
 
 void GC::mayPerformGC(std::vector<Val>& stack) {

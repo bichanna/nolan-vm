@@ -15,7 +15,7 @@ Obj::Obj(std::vector<Val>* list) {
 }
 
 Obj::Obj(Obj* name, std::vector<std::uint8_t>::iterator startingIp, std::uint8_t arity) {
-  this->func = {.name = name, .startingIp = startingIp, .arity = arity};
+  this->func = {name, startingIp, arity};
   this->objType = ObjType::Func;
   this->marked = false;
 }
