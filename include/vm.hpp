@@ -9,8 +9,7 @@
 #include "./gc.hpp"
 #include "./value.hpp"
 
-#define FRAMES_MAX 64
-#define INITIAL_STACK_SIZE FRAMES_MAX * 256
+#define INITIAL_STACK_SIZE 64 * 256
 #define MAGIC_NUMBER 2006 + 2018 + 0422 + 0305
 
 #define HEX_FORMAT(u8) "0x" << std::setw(2) << std::setfill('0') << std::hex << u8
