@@ -107,12 +107,6 @@ struct Program {
   Program();
 };
 
-struct CallFrame {
-  vector<uint8_t>::iterator returnAddr;
-  vector<uint8_t>::iterator ip;
-  uint32_t slotHead;
-};
-
 class VM {
  public:
   VM(fs::path filePath);
@@ -123,19 +117,19 @@ class VM {
   gc::GC* gc;
   vector<gc::Val>* consts;
   vector<uint8_t>* instructions;
-  vector<CallFrame> frames;
   vector<gc::Val> stack;
+  vector<uint8_t>::iterator ip;
   unordered_map<std::string, gc::Val> globals;  // The key is always a string.
 
-  bool nextIp(CallFrame& frame);
-  uint8_t readByte(CallFrame& frame);
-  uint16_t readTwoBytes(CallFrame& frame);
+  bool nextIp();
+  uint8_t readByte();
+  uint16_t readTwoBytes();
   void push(gc::Val val);
   gc::Val pop();
   void pop(int num);
   gc::Val peek(uint8_t peek);
-  void jump(CallFrame& frame, int32_t jump);
-  gc::Val readConst(CallFrame& frame);
+  void jump(int32_t jump);
+  gc::Val readConst();
   void setGlobal(gc::Val name, gc::Val newValue);
   gc::Val getGlobal(gc::Val& name);
 };
