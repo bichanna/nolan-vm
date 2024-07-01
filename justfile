@@ -19,8 +19,8 @@ release:
   meson compile -C {{BUILD_DIR}}
 
 format:
-  clang-format -i ./**/*.cpp
-  clang-format -i ./**/*.hpp
+  clang-format -i ./**/*.c
+  clang-format -i ./**/*.h
 
 clean:
   rm -rf {{BUILD_DIR}}

@@ -118,7 +118,7 @@ class VM {
   vector<uint8_t>* instructions;
   vector<gc::Val> stack;
   vector<uint8_t>::iterator ip;
-  unordered_map<std::string, gc::Val> globals;  // The key is always a string.
+  unordered_map<std::string, gc::Val> globals;
 
   bool nextIp();
   uint8_t readByte();
