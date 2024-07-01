@@ -12,6 +12,7 @@ include=include_directories('include')
 
 src=[
   'src/main.c',
+  'src/util/le.c',
 ]
 
 executable('nolanvm',
