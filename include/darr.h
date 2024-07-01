@@ -10,6 +10,7 @@
 // Usage:
 //
 // MAKE_DARR(int);
+//
 // DArr_int *da = darr_int_create();
 // darr_int_push(da, 123);
 // darr_int_push(da, 321);
