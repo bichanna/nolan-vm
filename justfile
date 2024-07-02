@@ -20,7 +20,9 @@ release:
 
 format:
   clang-format -i ./**/*.c
+  clang-format -i ./**/**/*.c
   clang-format -i ./**/*.h
+  clang-format -i ./**/**/*.h
 
 clean:
   rm -rf {{BUILD_DIR}}
