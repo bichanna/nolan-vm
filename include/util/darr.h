@@ -23,45 +23,18 @@
 
 #define DARR_INIT_SIZE 64
 
-#define MAKE_DARR(TYPE)                                             \
-  typedef struct {                                                  \
-    TYPE *array;                                                    \
-    size_t count;                                                   \
-    size_t capacity;                                                \
-  } DArr_##TYPE;                                                    \
-  DArr_##TYPE *darr_##TYPE_create() {                               \
-    DArr_##TYPE *da = (DArr_##Type)malloc(sizeof(DArr_##TYPE));     \
-    if (da == NULL) return NULL;                                    \
-    da->count = 0;                                                  \
-    da->capacity = DARR_INIT_SIZE;                                  \
-    da->array = (##Type *)malloc(DARR_INIT_SIZE * sizeof(TYPE));    \
-    if (da->array == NULL) {                                        \
-      free(da);                                                     \
-      return NULL;                                                  \
-    }                                                               \
-  }                                                                 \
-  void darr_##TYPE_push(DArr_##TYPE *da, TYPE elem) {               \
-    if (++(da->count) == da->capacity) {                            \
-      da->capacity *= 2;                                            \
-      da->array = realloc(da->array, da->capacity * TYPE);          \
-    }                                                               \
-    da->array[da->count - 1] = elem;                                \
-  }                                                                 \
-  ##TYPE *darr_##TYPE_pop(DArr_##TYPE *da) {                        \
-    if (da->count == 0) return NULL;                                \
-    return &(da->array[--(da->count)]);                             \
-  }                                                                 \
-  ##TYPE *darr_##TYPE_get(DArr_##TYPE *da, size_t idx) {            \
-    if (da->count <= idx) return NULL;                              \
-    return &(da->array[idx]);                                       \
-  }                                                                 \
-  void darr_##TYPE_set(DArr_##TYPE *da, size_t idx, ##TYPE value) { \
-    if (da->count <= idx) return;                                   \
-    da->array[idx] = value;                                         \
-  }                                                                 \
-  void darr_##TYPE_destroy(DArr_##TYPE *da) {                       \
-    free(da->array);                                                \
-    free(da);                                                       \
-  }
+typedef struct {
+  void *data;
+  size_t count;
+  size_t capacity;
+  size_t t_size;
+} DArr;
+
+DArr *darr_create(size_t t_size);
+bool darr_push(DArr *da, void *elem);
+void *darr_pop(DArr *da);
+void *darr_get(DArr *da, size_t idx);
+void darr_set(DArr *da, size_t idx, void *val);
+void darr_destroy(DArr *da);
 
 #endif
