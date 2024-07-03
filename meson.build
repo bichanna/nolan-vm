@@ -8,15 +8,14 @@ project('NolanVM', 'c',
   ]
 )
 
-include=include_directories('include')
-
 src=[
   'src/main.c',
-  'src/util/le.c',
+  'src/darr.c',
+  'src/gc.c',
+  'src/le.c',
 ]
 
 executable('nolanvm',
   src,
-  include_directories: include,
   install: true
 )

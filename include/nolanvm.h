@@ -1,8 +1,0 @@
-#ifndef NOLANVM_H
-#define NOLANVM_H
-
-#define NOLANVM_VERSION_MAJOR 0
-#define NOLANVM_VERSION_MINOR 1
-#define NOLANVM_VERSION_PATCH 0
-
-#endif
