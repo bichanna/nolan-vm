@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-// A very simple dynamic array implementation using a big macro.
+// A very simple dynamic array implementation.
 //
 // Usage:
 //
@@ -35,6 +35,7 @@ bool darr_push(DArr *da, void *elem);
 void *darr_pop(DArr *da);
 void *darr_get(DArr *da, size_t idx);
 void darr_set(DArr *da, size_t idx, void *val);
+void darr_set_capacity(DArr *da, size_t new_cap);
 void darr_destroy(DArr *da);
 
 #endif

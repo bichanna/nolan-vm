@@ -50,6 +50,12 @@ void darr_set(DArr *da, size_t idx, void *val) {
   memcpy(dest, val, da->t_size);
 }
 
+void darr_set_capacity(DArr *da, size_t new_cap) {
+  void *new_data = realloc(da->data, da->t_size * new_cap);
+  da->data = new_data;
+  da->capacity = new_cap;
+}
+
 void darr_destroy(DArr *da) {
   free(da->data);
   free(da);
