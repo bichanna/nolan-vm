@@ -45,4 +45,11 @@ size_t utf8_chars_length(const char* chars) {
   return length;
 }
 
+bool validate_utf8(const char* chars) {
+  if (strlen(chars) == 0)
+    return true;
+  else
+    return utf8_chars_length(chars) > 0;
+}
+
 size_t objstr_length(const ObjStr* str) { return utf8_chars_length(str->chars); }
