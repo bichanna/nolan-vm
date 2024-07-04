@@ -38,15 +38,15 @@ Val new_void() {
   return val;
 }
 
-Val new_str(GC *gc, char *chars) {
-  may_perform_gc(gc);
-
-  ObjStr str;
-  str.chars = chars;
-  str.length = 0;
-
-  Obj obj;
-  obj.marked = false;
-  obj.obj_t = OBJ_STR;
-  // obj.str =
-}
+// Val new_str(GC *gc, char *chars) {
+//   may_perform_gc(gc);
+//
+//   ObjStr str;
+//   str.chars = chars;
+//   str.length = 0;
+//
+//   Obj obj;
+//   obj.marked = false;
+//   obj.obj_t = OBJ_STR;
+//   // obj.str =
+// }
