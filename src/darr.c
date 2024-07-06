@@ -36,12 +36,12 @@ bool darr_push(DArr *da, void *elem) {
 
 void *darr_pop(DArr *da) {
   if (da->count == 0) return NULL;
-  return &(da->data[--(da->count)]);
+  return (char *)da->data + ((--da->count) * da->t_size);
 }
 
 void *darr_get(DArr *da, size_t idx) {
   if (da->count <= idx) return NULL;
-  return &(da->data[idx]);
+  return (char *)da->data + (idx * da->t_size);
 }
 
 void darr_set(DArr *da, size_t idx, void *val) {
