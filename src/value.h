@@ -40,8 +40,8 @@ struct ObjStr {
   size_t bytes_length;
 };
 
-Obj *create_objstr_from(char* chars);
-Obj *create_objlist_from(Val* values, size_t len);
+Obj* create_objstr_from(char* chars);
+Obj* create_objlist_from(Val* values, size_t len);
 
 void free_val(Val val);
 void free_obj(Obj* obj);
